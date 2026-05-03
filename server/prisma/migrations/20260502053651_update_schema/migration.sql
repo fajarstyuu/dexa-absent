@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `Role` ADD COLUMN `del` INTEGER NULL;
+
+-- AlterTable
+ALTER TABLE `User` ADD COLUMN `del` INTEGER NULL;
