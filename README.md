@@ -28,3 +28,36 @@ Dokumentasi API lengkap untuk project ini tersedia via Apidog dan dapat diakses 
 Berikut adalah struktur diagram ERD (Entity Relationship Diagram) dari aplikasi ini:
 
 ![ERD Diagram](<./lPFHRjem58Rl_HHdxAPeGwKjqTO9eMQGg57RqB6m6uIGIKwBXMD7ZgsIjNltnMa4WMbSJ5gviixtOPt_nrpbcYfjKWxUP0GZt51mbpaAJSYx11-OGCWKIwag5ciiJZPjw2y7VJFOz4_De7-w76or1wcGFOgjngp3Tbn8lH26SmitC0l74OJJszlvLh2GBZdMmYia-Pg9Z2gQ0YybNMG8KkcLR00bZKXYgGGgS1hpcDCy%20(1).png>)
+
+## 📝 Step By Step
+
+1. Clone repository ini ke lokal Anda.
+2. Masuk ke direktori `server` dan jalankan perintah berikut untuk menginstall dependencies:
+   ```bash
+   npm install
+   ```
+3. Jalankan perintah berikut untuk menjalankan aplikasi backend:
+   ```bash
+   npm run start:dev
+   ```
+4. Masuk ke direktori `client` dan jalankan perintah berikut untuk menginstall dependencies:
+   ```bash
+   npm install
+   ```
+5. Jalankan perintah berikut untuk menjalankan aplikasi frontend:
+   ```bash
+   npm run dev
+   ```
+6. Run docker compose untuk menjalankan database dan redis:
+   ```bash
+   docker-compose up -d
+   ```
+7. Lakukan migrasi database oleh prisma dengan perintah berikut:
+   ```bash
+   npx prisma migrate dev
+   ```
+8. Jalankan seeding database untuk mengisi data awal:
+   ```bash
+   npx prisma db seed
+   ```
+9. Akses aplikasi melalui browser di alamat `http://localhost:5173` untuk melihat hasilnya.

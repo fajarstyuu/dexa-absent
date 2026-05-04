@@ -1,84 +1,45 @@
-import { PrismaClient } from '@prisma/client/extension';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import { PrismaClient } from '../src/generated/prisma/client';
 import 'dotenv/config';
+import * as bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+const url = process.env.DATABASE_URL!;
+
+const adapter = new PrismaMariaDb(url);
+
+const prisma = new PrismaClient({
+  adapter,
+});
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = await bcrypt.genSalt();
+  const hash = await bcrypt.hash(password, salt);
+  return hash;
+}
 
 async function main() {
-  // Seed roles first, then users and related records.
-  const adminRole = await prisma.role.upsert({
-    where: { name: 'admin' },
-    update: {},
-    create: { name: 'admin' },
+  let hrRole = await prisma.role.findFirst({
+    where: { name: 'hr' },
   });
 
-  const userRole = await prisma.role.upsert({
-    where: { name: 'user' },
-    update: {},
-    create: { name: 'user' },
-  });
+  if (!hrRole) {
+    hrRole = await prisma.role.create({
+      data: { name: 'hr' },
+    });
+  }
 
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@dexa.local' },
+  const password = await hashPassword('1234');
+  const hrUser = await prisma.user.upsert({
+    where: { email: 'hr@gmail.com' },
     update: {
-      name: 'Admin',
-      roleId: adminRole.id,
+      name: 'HR User',
+      roleId: hrRole.id,
     },
     create: {
-      name: 'Admin',
-      email: 'admin@dexa.local',
-      password: 'admin123',
-      roleId: adminRole.id,
-    },
-  });
-
-  const demoUser = await prisma.user.upsert({
-    where: { email: 'user@dexa.local' },
-    update: {
-      name: 'Demo User',
-      roleId: userRole.id,
-    },
-    create: {
-      name: 'Demo User',
-      email: 'user@dexa.local',
-      password: 'user123',
-      roleId: userRole.id,
-    },
-  });
-
-  const adminAbsent = await prisma.absent.upsert({
-    where: { id: 1 },
-    update: {
-      userId: adminUser.id,
-      checkIn: new Date('2026-05-01T08:00:00.000Z'),
-      checkOut: new Date('2026-05-01T17:00:00.000Z'),
-    },
-    create: {
-      userId: adminUser.id,
-      checkIn: new Date('2026-05-01T08:00:00.000Z'),
-      checkOut: new Date('2026-05-01T17:00:00.000Z'),
-      pictures: {
-        create: [
-          { filePath: '/uploads/absents/admin-1.jpg' },
-          { filePath: '/uploads/absents/admin-2.jpg' },
-        ],
-      },
-    },
-  });
-
-  await prisma.absent.upsert({
-    where: { id: adminAbsent.id + 1 },
-    update: {
-      userId: demoUser.id,
-      checkIn: new Date('2026-05-01T09:15:00.000Z'),
-      checkOut: null,
-    },
-    create: {
-      userId: demoUser.id,
-      checkIn: new Date('2026-05-01T09:15:00.000Z'),
-      checkOut: null,
-      pictures: {
-        create: [{ filePath: '/uploads/absents/user-1.jpg' }],
-      },
+      name: 'HR User',
+      email: 'hr@gmail.com',
+      password: password,
+      roleId: hrRole.id,
     },
   });
 }

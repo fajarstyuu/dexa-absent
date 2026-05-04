@@ -52,8 +52,20 @@ export function RolePage() {
   return (
     <div className="flex min-h-[calc(100svh-8rem)] flex-col rounded-xl border border-dashed bg-background/60 text-center">
       <div className="flex flex-col-reverse gap-y-4 gap-x-4 lg:flex-row items-end justify-end w-full overflow-x-auto p-4">
-        <SortOrder value={sortOrder} onValueChange={(v) => { setSortOrder(v); setPage(1); }} />
-        <SortBy value={sortBy} onValueChange={(v) => { setSortBy(v); setPage(1); }} />
+        <SortOrder
+          value={sortOrder}
+          onValueChange={(v) => {
+            setSortOrder(v);
+            setPage(1);
+          }}
+        />
+        <SortBy
+          value={sortBy}
+          onValueChange={(v) => {
+            setSortBy(v);
+            setPage(1);
+          }}
+        />
         <Field className="w-full max-w-md">
           <input
             type="text"
@@ -69,10 +81,16 @@ export function RolePage() {
         <div className="flex flex-1 items-center justify-center p-8">
           <Spinner className="h-8 w-8" />
         </div>
+      ) : !data || data.length === 0 ? (
+        <div className="flex flex-1 items-center justify-center p-8">
+          <p className="text-muted-foreground">
+            Tidak ada data role yang ditemukan.
+          </p>
+        </div>
       ) : (
-        <DataTable 
-          columns={columns} 
-          data={data} 
+        <DataTable
+          columns={columns}
+          data={data}
           pageCount={Math.ceil(total / 10)}
           pageIndex={page - 1}
           setPageIndex={(index) => setPage(index + 1)}
