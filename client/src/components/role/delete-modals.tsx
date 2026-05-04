@@ -19,14 +19,14 @@ export function DeleteModalRole({ roleId }: { roleId: number }) {
   const [isOpen, setIsOpen] = useState(false);
   const handleDelete = async () => {
     try {
-      await deleteRole(roleId);
-      toast("Role berhasil dihapus", {position: "top-right" });
+      const res = await deleteRole(roleId);
+      toast.success(res.message, { position: "top-right" });
       setIsOpen(false);
       window.location.reload();
-    } catch (error) {
-      toast("Gagal menghapus role", {position: "top-right" });
+    } catch (error: any) {
+      toast.error(error.message, { position: "top-right" });
     }
-  }
+  };
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
@@ -36,14 +36,21 @@ export function DeleteModalRole({ roleId }: { roleId: number }) {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Apakah anda yakin ingin menghapus Role ini?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Apakah anda yakin ingin menghapus Role ini?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Tindakan ini tidak bisa dibatalkan. Role ini akan dihapus dari sistem.
+            Tindakan ini tidak bisa dibatalkan. Role ini akan dihapus dari
+            sistem.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setIsOpen(false)}>Batal</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={handleDelete}>Hapus</AlertDialogAction>
+          <AlertDialogCancel onClick={() => setIsOpen(false)}>
+            Batal
+          </AlertDialogCancel>
+          <AlertDialogAction variant="destructive" onClick={handleDelete}>
+            Hapus
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

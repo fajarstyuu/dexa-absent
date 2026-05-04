@@ -123,6 +123,12 @@ export class RolesService {
     if (!role) {
       throw new NotFoundException('Role tidak ditemukan');
     }
+    const isUsed = await this.prisma.user.findFirst({
+      where: { roleId: Number(id), del: null },
+    });
+    if (isUsed) {
+      throw new BadRequestException('Role telah digunakan oleh user');
+    }
     await this.prisma.role.update({
       where: { id: Number(id) },
       data: { del: 1 },
