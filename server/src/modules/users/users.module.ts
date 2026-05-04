@@ -4,9 +4,10 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { BcryptModule } from 'src/common/bcrypt/bcrypt.module';
 import { JwtModule } from '@nestjs/jwt';
+import { CacheModule } from 'src/common/cache/cache.module';
 
 @Module({
-  imports: [PrismaModule, BcryptModule, JwtModule],
+  imports: [PrismaModule, BcryptModule, JwtModule, CacheModule],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],

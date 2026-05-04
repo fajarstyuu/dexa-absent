@@ -64,17 +64,26 @@ export function CaptureImage() {
     setCapturedImage(null);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      setCapturedImage(null);
+    }
+  };
+
   const handleSave = async () => {
     if (capturedImage) {
       try {
         setIsLoading(true);
         const response = await fetch(capturedImage);
         const blob = await response.blob();
-        const extension = blob.type.split('/')[1] || 'jpeg';
-        const file = new File([blob], `absent.${extension}`, { type: blob.type });
-        
+        const extension = blob.type.split("/")[1] || "jpeg";
+        const file = new File([blob], `absent.${extension}`, {
+          type: blob.type,
+        });
+
         const data = await absent(file);
-        
+
         toast.success(data.message || "Absen berhasil");
         setIsOpen(false);
         setCapturedImage(null);
@@ -88,7 +97,7 @@ export function CaptureImage() {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <form>
         <DialogTrigger asChild>
           <Button size="lg" variant="outline" className="text-lg">
@@ -135,9 +144,6 @@ export function CaptureImage() {
               </Button>
             ) : (
               <>
-                <Button type="button" variant="outline" onClick={handleRetake} disabled={isLoading}>
-                  Retake
-                </Button>
                 <Button type="button" onClick={handleSave} disabled={isLoading}>
                   {isLoading ? <Spinner className="mr-2 h-4 w-4" /> : null}
                   Save

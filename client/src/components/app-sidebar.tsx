@@ -17,13 +17,15 @@ import {
   MapPinCheckInside,
   CircleUser,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthUser } from "@/guards/auth-guard";
 import { logout } from "@/modules/auth/auth";
 import { Button } from "./ui/button";
 
 export function AppSidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
   const handleLogout = async () => {
     await logout();
     navigate("/login");
@@ -46,7 +48,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive>
+              <SidebarMenuButton asChild isActive={pathname === "/"}>
                 <Link to="/">
                   <LayoutDashboard />
                   <span>Dashboard</span>
@@ -54,7 +56,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={pathname.startsWith("/employee")}>
                 <Link to="/employee">
                   <User />
                   <span>Karyawan</span>
@@ -62,7 +64,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={pathname.startsWith("/absent") && !pathname.startsWith("/absent/my")}>
                 <Link to="/absent">
                   <BookUser />
                   <span>Absen</span>
@@ -70,7 +72,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={pathname.startsWith("/absent/my")}>
                 <Link to="/absent/my">
                   <MapPinCheckInside />
                   <span>Absen Ku</span>
@@ -78,7 +80,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={pathname.startsWith("/role")}>
                 <Link to="/role">
                   <CircleUser />
                   <span>Role</span>
@@ -111,7 +113,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive>
+              <SidebarMenuButton asChild isActive={pathname === "/"}>
                 <Link to="/">
                   <LayoutDashboard />
                   <span>Dashboard</span>
@@ -119,7 +121,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={pathname.startsWith("/absent/my")}>
                 <Link to="/absent/my">
                   <MapPinCheckInside />
                   <span>Absen Ku</span>

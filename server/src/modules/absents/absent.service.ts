@@ -19,12 +19,14 @@ import {
   GetUserAbsentDtoResponse,
 } from './dto/getUserAbsent.dto';
 import { AbsentCheckoutDtoResponse } from './dto/absentCheckout.dto';
+import { CacheService } from 'src/common/cache/cache.service';
 
 @Injectable()
 export class AbsentsService {
   constructor(
     private prismaService: PrismaService,
     private supabaseService: SupabaseService,
+    private cacheService: CacheService,
   ) {}
   async createAbsent(
     picture: Express.Multer.File,
@@ -52,6 +54,13 @@ export class AbsentsService {
         checkIn: new Date(),
       },
     });
+
+    await Promise.all([
+      this.cacheService.deleteWithPattern('absents:getAll:*'),
+      this.cacheService.deleteWithPattern(`absents:user:${userId}:*`),
+      this.cacheService.deleteWithPattern(`absents:my:${userId}:*`),
+    ]);
+
     const res: CreateAbsentDtoResponse = {
       statusCode: HttpStatus.CREATED,
       message: 'Absen berhasil',
@@ -61,6 +70,13 @@ export class AbsentsService {
 
   async getAllAbsent(query: GetAllAbsentDto) {
     const { page, limit, sortBy, sortOrder, search, date } = query;
+    const cacheKey = `absents:getAll:${page}:${limit}:${sortBy}:${sortOrder}:${search || ''}:${date || ''}`;
+
+    const cachedData = await this.cacheService.get(cacheKey) as GetAllAbsentDtoResponse;
+    if (cachedData) {
+      return cachedData;
+    }
+
     const offset = (page - 1) * limit;
     const resData = await this.prismaService.absent.findMany({
       take: limit,
@@ -147,6 +163,8 @@ export class AbsentsService {
         : [],
       total,
     };
+
+    await this.cacheService.set(cacheKey, response);
     return response;
   }
 
@@ -158,6 +176,13 @@ export class AbsentsService {
     }
 
     const { page, limit, sortBy, sortOrder } = query;
+    const cacheKey = `absents:user:${userId}:${page}:${limit}:${sortBy}:${sortOrder}:${query.date || ''}`;
+
+    const cachedData = await this.cacheService.get(cacheKey) as GetUserAbsentDtoResponse;
+    if (cachedData) {
+      return cachedData;
+    }
+
     const offset = (page - 1) * limit;
     const resData = await this.prismaService.absent.findMany({
       take: limit,
@@ -184,6 +209,16 @@ export class AbsentsService {
         picturePath: true,
         checkIn: true,
         checkOut: true,
+      },
+    });
+
+    const nama = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+        del: null,
+      },
+      select: {
+        name: true,
       },
     });
 
@@ -227,8 +262,10 @@ export class AbsentsService {
           }))
         : [],
       total,
-      name: req.user.name,
+      name: nama?.name ? nama?.name : '',
     };
+
+    await this.cacheService.set(cacheKey, response);
     return response;
   }
 
@@ -273,6 +310,13 @@ export class AbsentsService {
         checkOut: now,
       },
     });
+
+    await Promise.all([
+      this.cacheService.deleteWithPattern('absents:getAll:*'),
+      this.cacheService.deleteWithPattern(`absents:user:${userId}:*`),
+      this.cacheService.deleteWithPattern(`absents:my:${userId}:*`),
+    ]);
+
     return {
       statusCode: HttpStatus.OK,
       message: 'Checkout berhasil',
@@ -281,6 +325,13 @@ export class AbsentsService {
 
   async getMyAbsent(userId: number, name: string, query: GetUserAbsentDto) {
     const { page, limit, sortBy, sortOrder, date } = query;
+    const cacheKey = `absents:my:${userId}:${page}:${limit}:${sortBy}:${sortOrder}:${date || ''}`;
+
+    const cachedData = await this.cacheService.get(cacheKey) as GetUserAbsentDtoResponse;
+    if (cachedData) {
+      return cachedData;
+    }
+
     const offset = (page - 1) * limit;
     const resData = await this.prismaService.absent.findMany({
       take: limit,
@@ -348,6 +399,8 @@ export class AbsentsService {
       total,
       name: name,
     };
+
+    await this.cacheService.set(cacheKey, response);
     return response;
   }
 

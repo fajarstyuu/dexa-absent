@@ -19,12 +19,14 @@ import {
 } from './dto/getUserById.dto';
 import { UpdateUserDtoRequest } from './dto/updateUser.dto';
 import { DeleteUserDtoResponse } from './dto/deleteUser.dto';
+import { CacheService } from 'src/common/cache/cache.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
     private bcrypt: BcryptService,
+    private cacheService: CacheService,
   ) {}
 
   async createUser(request: CreateUserDto): Promise<CreateUserDtoResponse> {
@@ -50,6 +52,7 @@ export class UsersService {
         roleId,
       },
     });
+    await this.cacheService.deleteWithPattern('users:getAll:*');
     const res: CreateUserDtoResponse = {
       statusCode: HttpStatus.CREATED,
       message: 'User berhasil dibuat',
@@ -59,6 +62,12 @@ export class UsersService {
 
   async getAll(query: GetAllUsersDtoRequest): Promise<GetAllUsersDtoResponse> {
     const { page, limit, sortBy, sortOrder, search } = query;
+    const key = `users:getAll:${page}:${limit}:${sortBy}:${sortOrder}:${search || ''}`;
+
+    const cachedData = await this.cacheService.get(key) as GetAllUsersDtoResponse;
+    if (cachedData) {
+      return cachedData;
+    }
     const offset = (page - 1) * limit;
     const res = await this.prisma.user.findMany({
       take: limit,
@@ -93,12 +102,15 @@ export class UsersService {
       email: user.email,
       role: user.role.name,
     }));
-    return {
+
+    const response: GetAllUsersDtoResponse = {
       statusCode: HttpStatus.OK,
       message: 'Users retrieved successfully',
-      data,
-      total,
+      data: data,
+      total: total,
     };
+    await this.cacheService.set(key, response);
+    return response;
   }
 
   async findOneByEmail(email: string): Promise<FindOneByEmailDto | null> {
@@ -123,6 +135,12 @@ export class UsersService {
   }
 
   async getUserById(id: number) {
+    const cacheKey = `users:getById:${id}`;
+    const cachedData = await this.cacheService.get(cacheKey) as GetUserByIdDtoResponse;
+    if (cachedData) {
+      return cachedData;
+    }
+
     const res = await this.prisma.user.findUnique({
       where: { id },
       select: {
@@ -152,6 +170,7 @@ export class UsersService {
       message: 'User retrieved successfully',
       data,
     };
+    await this.cacheService.set(cacheKey, response);
     return response;
   }
 
@@ -172,6 +191,9 @@ export class UsersService {
       },
     });
 
+    await this.cacheService.delete(`users:getById:${id}`);
+    await this.cacheService.deleteWithPattern('users:getAll:*');
+
     return {
       statusCode: HttpStatus.OK,
       message: 'User berhasil diperbarui',
@@ -191,6 +213,10 @@ export class UsersService {
         del: 1,
       },
     });
+
+    await this.cacheService.delete(`users:getById:${id}`);
+    await this.cacheService.deleteWithPattern('users:getAll:*');
+
     return {
       statusCode: HttpStatus.OK,
       message: 'User berhasil dihapus',

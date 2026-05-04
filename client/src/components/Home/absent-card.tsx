@@ -28,12 +28,14 @@ export function AbsentCard() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true)
-    isAlreadyabsent().then((data) => {
-      setIsAlreadyAbsent(data);
-    }).finally(() => {
-      setIsLoading(false);
-    });
+    setIsLoading(true);
+    isAlreadyabsent()
+      .then((data) => {
+        setIsAlreadyAbsent(data);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   return (
@@ -42,12 +44,16 @@ export function AbsentCard() {
         <ItemTitle className="text-xl md:text-3xl lg:text-5xl">
           {timeRealtime}
         </ItemTitle>
-        <ItemDescription>
-          Muted background for secondary content.
-        </ItemDescription>
+        <ItemDescription>Selamat datang!</ItemDescription>
       </ItemContent>
       <ItemActions>
-        {isLoading ? <Spinner /> : isAlreadyAbsent ? <CheckoutButton /> : <CaptureImage />}
+        {isLoading ? (
+          <Spinner />
+        ) : isAlreadyAbsent ? (
+          <CheckoutButton />
+        ) : (
+          <CaptureImage />
+        )}
       </ItemActions>
     </Item>
   );
