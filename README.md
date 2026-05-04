@@ -15,7 +15,7 @@ Project ini dirancang untuk memudahkan manajemen karyawan, peran (role), serta p
 - Autentikasi dan otorisasi pengguna.
 - Manajemen data karyawan dan role.
 - Pencatatan dan pelacakan absensi harian.
-- Dashboard dan tabel absensi (_absent card & table_).
+- Dashboard dan tabel absensi.
 
 ## 📚 API Documentation
 
