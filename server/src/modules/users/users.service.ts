@@ -64,7 +64,9 @@ export class UsersService {
     const { page, limit, sortBy, sortOrder, search } = query;
     const key = `users:getAll:${page}:${limit}:${sortBy}:${sortOrder}:${search || ''}`;
 
-    const cachedData = await this.cacheService.get(key) as GetAllUsersDtoResponse;
+    const cachedData = (await this.cacheService.get(
+      key,
+    )) as GetAllUsersDtoResponse;
     if (cachedData) {
       return cachedData;
     }
@@ -135,8 +137,16 @@ export class UsersService {
   }
 
   async getUserById(id: number) {
+    const isUserExist = await this.prisma.user.findUnique({
+      where: { id, del: null },
+    });
+    if (!isUserExist) {
+      throw new NotFoundException('User tidak ditemukan');
+    }
     const cacheKey = `users:getById:${id}`;
-    const cachedData = await this.cacheService.get(cacheKey) as GetUserByIdDtoResponse;
+    const cachedData = (await this.cacheService.get(
+      cacheKey,
+    )) as GetUserByIdDtoResponse;
     if (cachedData) {
       return cachedData;
     }
